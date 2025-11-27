@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { readFileSync } from "fs";
 import { test, expect } from "bun:test";
 import { range } from "lodash";
 
@@ -18,7 +18,7 @@ const makeAt =
 	({ x, y }: Point): XmasLetter | null =>
 		matrix[y]?.[x] ?? null;
 
-let possibilites = (startingLetterXPoint: Point): Point[][] => {
+let wordSearchPossibilites = (startingLetterXPoint: Point): Point[][] => {
 	const { x, y } = startingLetterXPoint;
 
 	let horizontal: Point[] = [0, 1, 2, 3].map((deltaX) => ({
@@ -64,40 +64,45 @@ let possibilites = (startingLetterXPoint: Point): Point[][] => {
 		vertical,
 		verticalBackwards,
 		rDiagonal,
-    rDiagonalBackwards,
-    lDiagonal,
-    lDiagonalBackwards
+		rDiagonalBackwards,
+		lDiagonal,
+		lDiagonalBackwards,
 	];
 };
 
-let countXmas = (str: string): number => {
-	let result = 0;
+function* pointsOfMatrix(matrix: any[][]): Generator<Point> {
+	for (const [y, row] of matrix.entries()) {
+		for (const [x, _] of row.entries()) {
+			yield { x, y };
+		}
+	}
+}
 
+let countXmas = (str: string): number => {
 	let matrix = asMatrix(str);
 	let at = makeAt(matrix);
 
-	for (const y of range(0, matrix.length)) {
-		for (const x of range(0, matrix[0]!.length)) {
-			let point: Point = { x, y };
-
-			if (at(point) === "X") {
-				const matches = possibilites(point).filter(
-					(points) =>
-						points
-							.map(at)
-							.filter((x) => x !== null)
-							.join("") === "XMAS",
-				);
-
-				result += matches.length;
-			} else {
-				continue;
-			}
-		}
-	}
+	const result = pointsOfMatrix(matrix)
+		.filter((point) => at(point) === "X")
+		.flatMap(wordSearchPossibilites)
+		.filter((possible) => possible.map(at).join("") === "XMAS")
+		.reduce((n) => n + 1, 0);
 
 	return result;
 };
+
+let testCase = `
+MMMSXXMASM
+MSAMXMSMSA
+AMXSXMAAMM
+MSAMASMSMX
+XMASAMXAMM
+XXAMMXXAMA
+SMSMSASXSS
+SAXAMASAAA
+MAMMMXMMMM
+MXMXAXMASX
+`.trim();
 
 test("pt1", () => {
 	// One dimension
@@ -130,20 +135,37 @@ XAAX
 SXXS`.trim();
 	expect(countXmas(twoDDiagonal)).toEqual(2);
 
-	let testCase = `
-MMMSXXMASM
-MSAMXMSMSA
-AMXSXMAAMM
-MSAMASMSMX
-XMASAMXAMM
-XXAMMXXAMA
-SMSMSASXSS
-SAXAMASAAA
-MAMMMXMMMM
-MXMXAXMASX
-`.trim();
-
 	expect(countXmas(testCase)).toEqual(18);
+	expect(countXmas(data)).toEqual(2644);
+});
 
-  expect(countXmas(data)).toEqual(2644);
+const countMasXd = (str: string): number => {
+	const matrix = asMatrix(str);
+	const at = makeAt(matrix);
+
+	const isMas = (lhs: XmasLetter | null, rhs: XmasLetter | null): boolean => {
+		let forwards = lhs === "M" && rhs === "S";
+		let backwards = lhs === "S" && rhs === "M";
+		return forwards || backwards;
+	};
+
+	let result: number = pointsOfMatrix(matrix)
+		.filter((point) => at(point) === "A")
+		.filter(({ x, y }) => {
+			let topLeft = at({ x: x - 1, y: y + 1 });
+			let bottomRight = at({ x: x + 1, y: y - 1 });
+
+			let topRight = at({ x: x + 1, y: y + 1 });
+			let bottomLeft = at({ x: x - 1, y: y - 1 });
+
+			return isMas(topLeft, bottomRight) && isMas(topRight, bottomLeft);
+		})
+		.reduce((x) => x + 1, 0);
+
+	return result;
+};
+
+test("pt2", () => {
+	expect(countMasXd(testCase)).toEqual(9);
+	expect(countMasXd(data)).toEqual(1952);
 });
