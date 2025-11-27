@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { exec } from "child_process";
 import { readFileSync } from "fs";
 import _, { find } from "lodash";
 import { runInThisContext } from "vm";
@@ -46,7 +47,7 @@ test("pt1", () => {
 	expect(answer).toEqual(185797128);
 });
 
-type Token = "do" | "don't" | ["mul", number, number];
+type Token = "do" | "don't" | [number, number];
 
 function* lex(input: string): IterableIterator<Token> {
 	let i = 0;
@@ -61,7 +62,7 @@ function* lex(input: string): IterableIterator<Token> {
 			i += "don't()".length;
 			yield "don't";
 		} else if (rest.startsWith("mul(")) {
-			const match = rest.match(/mul\((\d+),\s*(\d+)\)/);
+			const match = rest.match(/mul\((\d+),(\d+)\)/);
 
 			if (match === null) {
 				i++;
@@ -70,7 +71,7 @@ function* lex(input: string): IterableIterator<Token> {
 				i += match[0].length;
 				let num1 = match[1]!;
 				let num2 = match[2]!;
-				yield ["mul", Number(num1), Number(num2)];
+				yield [Number(num1), Number(num2)];
 			}
 		} else {
 			i++;
@@ -90,17 +91,24 @@ test("pt2", () => {
 	expect([...lex("aaadon't()aaado()aaa")]).toEqual(["don't", "do"]);
 
 	// mul lexing
-	expect([...lex("mul(1,2)")]).toEqual([["mul", 1, 2]]);
+	expect([...lex("mul(1,2)")]).toEqual([[1, 2]]);
 	expect([...lex("multiply(1,2)")]).toEqual([]);
+	expect([...lex("mul(1,2)do()mul(3,44343)do()mul(5, 6)don't()")]).toEqual([
+		[1, 2],
+		"do",
+		[3, 44343],
+		"do",
+		"don't",
+	]);
 
 	expect([...lex(testCase)]).toEqual([
-		["mul", 2, 4],
+		[2, 4],
 		"don't",
-		["mul", 5, 5],
-		["mul", 11, 8],
-		["mul", 11, 8],
+		[5, 5],
+		[11, 8],
+		[11, 8],
 		"do",
-		["mul", 8, 5],
+		[8, 5],
 	]);
 
 	let answer = (input: string) => {
@@ -114,7 +122,7 @@ test("pt2", () => {
 				enabled = false;
 			} else {
 				if (enabled) {
-					res += token[1] * token[2];
+					res += token[0] * token[1];
 				}
 			}
 		}
@@ -123,5 +131,5 @@ test("pt2", () => {
 	};
 
 	expect(answer(testCase)).toEqual(48);
-  expect(answer(data)).toEqual(93790718);
+	expect(answer(data)).toEqual(93790718);
 });
