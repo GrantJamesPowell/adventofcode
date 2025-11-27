@@ -1,7 +1,10 @@
+import { readFileSync } from 'fs';
 import { test, expect } from "bun:test";
 import { range } from "lodash";
 
 type XmasLetter = "X" | "M" | "A" | "S";
+
+const data = readFileSync("./inputs/day4.txt", "utf8");
 
 const isLetterXmasLetter = (x: string): x is XmasLetter => `XMAS`.includes(x);
 
@@ -141,4 +144,6 @@ MXMXAXMASX
 `.trim();
 
 	expect(countXmas(testCase)).toEqual(18);
+
+  expect(countXmas(data)).toEqual(2644);
 });

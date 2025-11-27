@@ -1,8 +1,6 @@
 import { expect, test } from "bun:test";
-import { exec } from "child_process";
 import { readFileSync } from "fs";
-import _, { find } from "lodash";
-import { runInThisContext } from "vm";
+import _ from "lodash";
 
 const data = readFileSync("./inputs/day3.txt", "utf8");
 
