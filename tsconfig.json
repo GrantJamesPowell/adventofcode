@@ -26,8 +26,6 @@
 		"noUnusedParameters": false,
 		"noPropertyAccessFromIndexSignature": false,
 
-		"compilerOptions": {
-			"types": ["bun-types"]
-		}
+		"types": ["bun-types"]
 	}
 }
