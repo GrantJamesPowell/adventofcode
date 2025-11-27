@@ -17,17 +17,54 @@ const makeAt =
 
 let possibilites = (startingLetterXPoint: Point): Point[][] => {
 	const { x, y } = startingLetterXPoint;
+
 	let horizontal: Point[] = [0, 1, 2, 3].map((deltaX) => ({
 		x: x + deltaX,
 		y,
 	}));
+
+	let horizontalBackwards: Point[] = [0, 1, 2, 3].map((deltaX) => ({
+		x: x - deltaX,
+		y,
+	}));
+
 	let vertical: Point[] = [0, 1, 2, 3].map((deltaY) => ({ x, y: y + deltaY }));
-	let diagonal: Point[] = [0, 1, 2, 3].map((delta) => ({
+
+	let verticalBackwards: Point[] = [0, 1, 2, 3].map((deltaY) => ({
+		x,
+		y: y - deltaY,
+	}));
+
+	let rDiagonal: Point[] = [0, 1, 2, 3].map((delta) => ({
 		x: x + delta,
 		y: y + delta,
 	}));
 
-	return [horizontal, vertical, diagonal];
+	let rDiagonalBackwards: Point[] = [0, 1, 2, 3].map((delta) => ({
+		x: x - delta,
+		y: y - delta,
+	}));
+
+	let lDiagonal: Point[] = [0, 1, 2, 3].map((delta) => ({
+		x: x - delta,
+		y: y + delta,
+	}));
+
+	let lDiagonalBackwards: Point[] = [0, 1, 2, 3].map((delta) => ({
+		x: x + delta,
+		y: y - delta,
+	}));
+
+	return [
+		horizontal,
+		horizontalBackwards,
+		vertical,
+		verticalBackwards,
+		rDiagonal,
+    rDiagonalBackwards,
+    lDiagonal,
+    lDiagonalBackwards
+	];
 };
 
 let countXmas = (str: string): number => {
@@ -65,6 +102,7 @@ test("pt1", () => {
 	expect(countXmas("X")).toEqual(0);
 	expect(countXmas("XMA")).toEqual(0);
 	expect(countXmas("XMAS")).toEqual(1);
+	expect(countXmas("SAMX")).toEqual(1);
 
 	let twoDHorizontal = `
 XMAS
@@ -76,10 +114,10 @@ XMAS`.trim();
 	expect(countXmas(twoDHorizontal)).toEqual(2);
 
 	let twoDVertical = `
-XX
-MM
-AA
-SS`.trim();
+XS
+MA
+AM
+SX`.trim();
 	expect(countXmas(twoDVertical)).toEqual(2);
 
 	let twoDDiagonal = `
