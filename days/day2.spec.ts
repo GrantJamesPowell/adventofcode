@@ -129,6 +129,6 @@ test("pt2", () => {
 	// 9 7 6 2 1: Unsafe regardless of which level is removed.
 	expect(checkLevel([9, 7, 6, 2, 1])).toEqual(false);
 
-  const answer = levels.filter((level) => checkLevel(level)).length - 1;
+	const answer = levels.filter((level) => checkLevel(level)).length - 1;
 	expect(answer).toEqual(400);
 });
