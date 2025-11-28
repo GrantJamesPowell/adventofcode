@@ -70,10 +70,10 @@ let wordSearchPossibilites = (startingLetterXPoint: Point): Point[][] => {
 	];
 };
 
-function* pointsOfMatrix(matrix: any[][]): Generator<Point> {
+function* pointsOfMatrix<T>(matrix: T[][]): Generator<Point & { val: T }> {
 	for (const [y, row] of matrix.entries()) {
-		for (const [x, _] of row.entries()) {
-			yield { x, y };
+		for (const [x, val] of row.entries()) {
+			yield { x, y, val };
 		}
 	}
 }
@@ -83,9 +83,10 @@ let countXmas = (str: string): number => {
 	let at = makeAt(matrix);
 
 	const result = pointsOfMatrix(matrix)
-		.filter((point) => at(point) === "X")
+		.filter((point) => point.val === "X")
 		.flatMap(wordSearchPossibilites)
-		.filter((possible) => possible.map(at).join("") === "XMAS")
+		.map((possible) => possible.map(at).join(""))
+		.filter((word) => word === "XMAS")
 		.reduce((n) => n + 1, 0);
 
 	return result;
