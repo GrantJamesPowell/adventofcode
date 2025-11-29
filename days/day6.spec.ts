@@ -44,7 +44,7 @@ let parseData = (data: string) => {
 			switch (val) {
 				case "^": {
 					curr = { x, y };
-          positions.set(point2Str({ x, y }), '.');
+					positions.set(point2Str({ x, y }), ".");
 					dir = "N";
 					break;
 				}
@@ -97,7 +97,7 @@ const calcUniquePositions = (data: string): number => {
 	const starting = parseData(data);
 
 	let unique = new Set<string>();
-  unique.add(point2Str(starting.curr));
+	unique.add(point2Str(starting.curr));
 
 	let curr: Point = starting.curr;
 	let dir: Dir = starting.dir;
@@ -105,10 +105,9 @@ const calcUniquePositions = (data: string): number => {
 	let step = 0;
 
 	walking: while (true) {
-		console.log(`STEP: ${step}`);
-		console.log(
-			printCurrent({ curr, dir, unique, positions: starting.positions }),
-		);
+		// console.log(
+		// 	printCurrent({ curr, dir, unique, positions: starting.positions }),
+		// );
 		step++;
 		let next = nextPoint(curr, dir);
 
@@ -125,6 +124,8 @@ const calcUniquePositions = (data: string): number => {
 			case null: {
 				break walking;
 			}
+			default:
+				throw new Error("Unreachable");
 		}
 	}
 
@@ -142,10 +143,10 @@ const printCurrent = (params: {
 	const height = _.max(points.map((point) => point.y)) ?? 0;
 	const width = _.max(points.map((point) => point.x)) ?? 0;
 
-	let result = "   " + range(0, width + 1).join('') + "\n";
+	let result = "";
 
 	for (const y of _.range(0, height + 1)) {
-    result += `${y.toString()}: `
+		result += `${y.toString()}: `;
 		for (const x of _.range(0, width + 1)) {
 			if (curr.x === x && curr.y === y) {
 				switch (dir) {
@@ -165,10 +166,10 @@ const printCurrent = (params: {
 			} else if (unique.has(point2Str({ x, y }))) {
 				result += "X";
 			} else {
-        result += positions.get(point2Str({ x, y })) ?? '?';
-      }
+				result += positions.get(point2Str({ x, y })) ?? "?";
+			}
 		}
-    result += "\n"
+		result += "\n";
 	}
 
 	return result;
@@ -176,4 +177,5 @@ const printCurrent = (params: {
 
 test("p1", () => {
 	expect(calcUniquePositions(testData)).toEqual(41);
+	expect(calcUniquePositions(data)).toEqual(4515);
 });
