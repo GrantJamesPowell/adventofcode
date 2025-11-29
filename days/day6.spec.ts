@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { test, expect } from "bun:test";
-import _ from "lodash";
+import _, { range } from "lodash";
 
 const data = readFileSync("./inputs/day6.txt", "utf8");
 
@@ -44,6 +44,7 @@ let parseData = (data: string) => {
 			switch (val) {
 				case "^": {
 					curr = { x, y };
+          positions.set(point2Str({ x, y }), '.');
 					dir = "N";
 					break;
 				}
@@ -95,7 +96,8 @@ const turnRight = (dir: Dir): Dir => {
 const calcUniquePositions = (data: string): number => {
 	const starting = parseData(data);
 
-	let unique = new Set<string>(point2Str(starting.curr));
+	let unique = new Set<string>();
+  unique.add(point2Str(starting.curr));
 
 	let curr: Point = starting.curr;
 	let dir: Dir = starting.dir;
@@ -103,11 +105,11 @@ const calcUniquePositions = (data: string): number => {
 	let step = 0;
 
 	walking: while (true) {
-		step++;
 		console.log(`STEP: ${step}`);
 		console.log(
 			printCurrent({ curr, dir, unique, positions: starting.positions }),
 		);
+		step++;
 		let next = nextPoint(curr, dir);
 
 		switch (starting.positions.get(point2Str(next)) ?? null) {
@@ -137,14 +139,15 @@ const printCurrent = (params: {
 }) => {
 	const { unique, positions, curr, dir } = params;
 	const points = [...positions].map(([key, _val]) => str2Point(key));
-	const height = _.max(points.map((point) => point.y));
-	const width = _.max(points.map((point) => point.x));
+	const height = _.max(points.map((point) => point.y)) ?? 0;
+	const width = _.max(points.map((point) => point.x)) ?? 0;
 
-	let result = "";
+	let result = "   " + range(0, width + 1).join('') + "\n";
 
-	for (const y of _.range(0, height)) {
-		for (const x of _.range(0, width)) {
-			if (_.eq(curr, { x, y })) {
+	for (const y of _.range(0, height + 1)) {
+    result += `${y.toString()}: `
+		for (const x of _.range(0, width + 1)) {
+			if (curr.x === x && curr.y === y) {
 				switch (dir) {
 					case "N":
 						result += "↑";
