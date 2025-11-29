@@ -136,28 +136,28 @@ const calcP2 = (data: string) => {
 };
 
 const calcOrdering = (input: number[], rules: RuleMapping): number[] => {
-  let remaining = [...input];
-  let output: number[] = [];
+	let remaining = [...input];
+	let output: number[] = [];
 
-  const canAppear = (num: number): boolean => {
-    const mustBeAfter = rules.get(num) ?? [];
-    return mustBeAfter.every(x => !remaining.includes(x))
-  }
+	const canAppear = (num: number): boolean => {
+		const mustBeAfter = rules.get(num) ?? [];
+		return mustBeAfter.every((x) => !remaining.includes(x));
+	};
 
-  while (remaining.length > 0) {
-    let next = remaining.pop()!;
+	while (remaining.length > 0) {
+		let next = remaining.pop()!;
 
-    if (canAppear(next)) {
-      output.push(next);
-    } else {
-      remaining.unshift(next);
-    }
-  }
+		if (canAppear(next)) {
+			output.push(next);
+		} else {
+			remaining.unshift(next);
+		}
+	}
 
-  return output;
+	return output;
 };
 
 test("p2", () => {
 	expect(calcP2(testRules)).toEqual(123);
-  expect(calcP2(data)).toEqual(3062);
+	expect(calcP2(data)).toEqual(3062);
 });
