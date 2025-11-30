@@ -65,19 +65,28 @@ const parseLinks = (input: string): Links => {
 function* triples(str: string): Generator<[string, string, string]> {
 	const links = parseLinks(str);
 
-	for (const [parent, connected] of _.sortBy([...links], ([p, _]) => p)) {
-		for (const child of [...connected]
+	for (const [parent, children] of _.sortBy([...links], ([p, _]) => p)) {
+		for (const child of [...children]
 			.sort()
 			.filter((child) => child > parent)) {
 			const grandChildren = links.get(child) ?? new Set();
+
 			for (const grandChild of [...grandChildren]
 				.sort()
 				.filter((gc) => gc > child)) {
-				yield [parent, child, grandChild];
+				const greatGrandChildren = links.get(grandChild) ?? new Set();
+
+				if (greatGrandChildren.has(parent)) {
+					yield [parent, child, grandChild];
+				}
 			}
 		}
 	}
 }
+
+const part1 = (str: string): number =>
+	[...triples(str)].filter((node) => node.some((name) => name.startsWith("t")))
+		.length;
 
 test("pt1", () => {
 	expect([...triples(testData)].map((x) => x.join(","))).toEqual([
@@ -94,4 +103,7 @@ test("pt1", () => {
 		"td,wh,yn",
 		"ub,vc,wq",
 	]);
+
+	expect(part1(testData)).toEqual(7);
+	expect(part1(data)).toEqual(1156);
 });
