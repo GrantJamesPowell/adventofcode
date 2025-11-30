@@ -88,6 +88,45 @@ const part1 = (str: string): number =>
 	[...triples(str)].filter((node) => node.some((name) => name.startsWith("t")))
 		.length;
 
+const interconnectedSets = (graph: Links): Set<string> => {
+	let best: Set<string> = new Set();
+
+	const bronKerbosch = (R: Set<string>, P: Set<string>, X: Set<string>) => {
+		// Maximal clique found
+		if (P.size === 0 && X.size === 0) {
+			if (R.size > best.size) best = new Set(R);
+			return;
+		}
+
+		// Choose pivot u from P ∪ X
+		const unionPX = P.union(X);
+		const u = unionPX.values().next().value as string;
+		const neighborsU = graph.get(u)!;
+
+		// Only explore vertices not adjacent to pivot
+		const toExplore = [...P.difference(neighborsU)];
+
+		for (const v of toExplore) {
+			const neighborsV = graph.get(v)!;
+
+			bronKerbosch(
+				R.union(new Set([v])),
+				P.intersection(neighborsV),
+				X.intersection(neighborsV),
+			);
+
+			// Remove from P & add to X
+			P.delete(v);
+			X.add(v);
+		}
+	};
+
+	const allNodes = new Set(graph.keys());
+	bronKerbosch(new Set(), allNodes, new Set());
+
+	return best;
+};
+
 test("pt1", () => {
 	expect([...triples(testData)].map((x) => x.join(","))).toEqual([
 		"aq,cg,yn",
@@ -106,4 +145,14 @@ test("pt1", () => {
 
 	expect(part1(testData)).toEqual(7);
 	expect(part1(data)).toEqual(1156);
+});
+
+test("pt2", () => {
+	expect(interconnectedSets(parseLinks(testData))).toEqual(
+		new Set(["de", "co", "ta", "ka"]),
+	);
+
+	expect(
+		interconnectedSets(parseLinks(data)).keys().toArray().sort().join(","),
+	).toEqual("bx,cx,dr,dx,is,jg,km,kt,li,lt,nh,uf,um");
 });
