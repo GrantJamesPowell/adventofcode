@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { test, expect } from "bun:test";
 
-const data = readFileSync("./inputs/day5.txt", "utf8");
+const data = readFileSync("./2024/inputs/day5.txt", "utf8");
 
 const processData = (data: string) => {
 	let rules: [number, number][] = [];

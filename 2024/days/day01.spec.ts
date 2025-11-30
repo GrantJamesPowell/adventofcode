@@ -76,7 +76,7 @@ import { test, expect } from "bun:test";
 import { readFileSync } from "fs";
 import _ from "lodash";
 
-const input = readFileSync("./inputs/day1.txt", "utf-8");
+const input = readFileSync("./2024/inputs/day1.txt", "utf-8");
 let rows = input
 	.trim()
 	.split("\n")

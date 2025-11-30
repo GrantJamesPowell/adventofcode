@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "fs";
 import _ from "lodash";
 
-const data = readFileSync("./inputs/day3.txt", "utf8");
+const data = readFileSync("./2024/inputs/day3.txt", "utf8");
 
 const findMuls = (x: string): string[] => {
 	const regex = /mul\(\d+,\s*\d+\)/g;
