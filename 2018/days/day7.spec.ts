@@ -24,13 +24,8 @@ const parse = (str: string): DepGraph => {
 		const from = words[1]!;
 		const to = words[7]!;
 
-    if (!result.has(from)) {
-      result.set(from, new Set());
-    }
-
-		if (!result.has(to)) {
-			result.set(to, new Set());
-		}
+		result.set(from, result.get(from) ?? new Set());
+		result.set(to, result.get(to) ?? new Set());
 
 		result.get(to)!.add(from);
 	}
@@ -39,26 +34,22 @@ const parse = (str: string): DepGraph => {
 };
 
 const p1 = (graph: DepGraph): string[] => {
-  console.log({ graph });
 	const result: string[] = [];
 
 	while (graph.size > 0) {
-		const seen = new Set(result);
-
-		const level = graph
+		const next = graph
 			.entries()
-			.flatMap(([key, reqs]) => (reqs.isSubsetOf(seen) ? [key] : []))
+			.flatMap(([key, reqs]) => (reqs.isSubsetOf(new Set(result)) ? [key] : []))
 			.toArray()
-			.sort();
+			.sort()
+			.at(0);
 
-		if (level.length == 0) {
-			throw new Error(`Circ Dep on ${graph.keys().toArray().join(", ")}`);
+		if (next == undefined) {
+			throw new Error(`Circ Dep issue on ${graph.keys().toArray().join(", ")}`);
 		}
 
-		for (const node of level) {
-			result.push(node);
-			graph.delete(node);
-		}
+		result.push(next);
+		graph.delete(next);
 	}
 
 	return result;
@@ -66,5 +57,5 @@ const p1 = (graph: DepGraph): string[] => {
 
 test("p1", () => {
 	expect(p1(parse(testData)).join("")).toEqual("CABDFE");
-  expect(p1(parse(data)).join("")).toEqual("");
+	expect(p1(parse(data)).join("")).toEqual("EUGJKYFQSCLTWXNIZMAPVORDBH");
 });
