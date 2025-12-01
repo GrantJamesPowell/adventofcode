@@ -12,46 +12,48 @@ Step D must be finished before step E can begin.
 Step F must be finished before step E can begin.
 `.trim();
 
-class MinHeap<T> {
-	readonly data: T[];
-	constructor() {
-		this.data = [];
-	}
+export class MinHeap<T> {
+	private data: Array<{ priority: number; value: T }> = [];
 
-	size() {
+	size(): number {
 		return this.data.length;
 	}
 
-	peek() {
+	peek(): { priority: number; value: T } | undefined {
 		return this.data[0];
 	}
 
-	push(value: T) {
-		this.data.push(value);
-		this.#bubbleUp();
+	push(priority: number, value: T): void {
+		this.data.push({ priority, value });
+		this.bubbleUp();
 	}
 
-	pop() {
+	pop(): [number, T] | undefined {
 		if (this.data.length === 0) return undefined;
-		if (this.data.length === 1) return this.data.pop();
+		if (this.data.length === 1) {
+			const { priority, value } = this.data.pop()!;
+			return [priority, value];
+		}
 
-		const min = this.data[0];
+		const min = this.data[0]!;
 		this.data[0] = this.data.pop()!;
-		this.#bubbleDown();
-		return min;
+		this.bubbleDown();
+		return [min.priority, min.value];
 	}
 
-	#bubbleUp() {
+	private bubbleUp(): void {
 		let i = this.data.length - 1;
+
 		while (i > 0) {
 			const parent = Math.floor((i - 1) / 2);
-			if (this.data[parent]! <= this.data[i]!) break;
+			if (this.data[parent]!.priority <= this.data[i]!.priority) break;
+
 			[this.data[i], this.data[parent]] = [this.data[parent]!, this.data[i]!];
 			i = parent;
 		}
 	}
 
-	#bubbleDown() {
+	private bubbleDown(): void {
 		let i = 0;
 		const length = this.data.length;
 
@@ -60,12 +62,20 @@ class MinHeap<T> {
 			const right = 2 * i + 2;
 			let smallest = i;
 
-			if (left < length && this.data[left]! < this.data[smallest]!) {
+			if (
+				left < length &&
+				this.data[left]!.priority < this.data[smallest]!.priority
+			) {
 				smallest = left;
 			}
-			if (right < length && this.data[right]! < this.data[smallest]!) {
+
+			if (
+				right < length &&
+				this.data[right]!.priority < this.data[smallest]!.priority
+			) {
 				smallest = right;
 			}
+
 			if (smallest === i) break;
 
 			[this.data[i], this.data[smallest]] = [
@@ -127,22 +137,35 @@ const p2 = (
 	opts: { cost: number; workers: number },
 ): number => {
 	const { cost, workers } = opts;
+	let done: string[] = [];
+
 	let currTime = 0;
 
-	const heap = new MinHeap<number>();
+	const heap = new MinHeap<string>();
 
-	for (const task of p1(graph)) {
-		const taskCost = cost + taskLetterToCost(task);
+	while (graph.size > 0) {
+		const next = graph
+			.entries()
+			.flatMap(([key, reqs]) => (reqs.isSubsetOf(new Set(done)) ? [key] : []))
+			.toArray()
+			.sort()
+			.at(0);
 
-		if (heap.size() >= workers) {
-			currTime = heap.pop()!;
+		if (next === undefined || heap.size() >= workers) {
+			const [nextTime, finishedTask] = heap.pop()!;
+			done.push(finishedTask);
+			currTime = nextTime;
+			continue;
 		}
 
-		heap.push(currTime + taskCost);
+		const finishedAt = currTime + cost + taskLetterToCost(next);
+		heap.push(finishedAt, next);
+		graph.delete(next);
 	}
 
 	while (heap.size() > 0) {
-		currTime = Math.max(currTime, heap.pop()!);
+		const [finishedAt, _task] = heap.pop()!;
+		currTime = Math.max(currTime, finishedAt);
 	}
 
 	return currTime;
@@ -155,4 +178,5 @@ test("p1", () => {
 
 test("p2", () => {
 	expect(p2(parse(testData), { cost: 0, workers: 2 })).toEqual(15);
+	expect(p2(parse(data), { cost: 60, workers: 5 })).toEqual(1014);
 });
