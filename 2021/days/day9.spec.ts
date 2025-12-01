@@ -28,43 +28,44 @@ const lowPoints = (grid: Grid) =>
 	);
 
 const p1 = (grid: Grid): number =>
-	lowPoints(grid)
-		.map((point) => point.val + 1)
-		.reduce((acc, next) => acc + next, 0);
+	lowPoints(grid).reduce((acc, point) => acc + point.val + 1, 0);
 
 const point2str = ({ x, y }: Point) => `${x}:${y}`;
 
 const p2 = (grid: Grid): number => {
+	const seen: Set<string> = new Set();
 	const at = ({ x, y }: Point) => grid[y]?.[x] ?? null;
 
-	const seen: Set<string> = new Set();
+	const bfs = (start: Point): number => {
+		const queue = [start];
+		let size = 0;
 
-	const fill = (point: Point): number => {
-		if (seen.has(point2str(point))) {
-			return 0;
-		}
+		while (queue.length > 0) {
+			const p = queue.shift()!;
 
-		seen.add(point2str(point));
+			if (seen.has(point2str(p))) {
+				continue;
+			}
 
-		let size = 1;
+			seen.add(point2str(p));
+			const pointVal = at(p);
 
-		for (const adjPoint of adjPointsOf(point)) {
-			const adjValue = at(adjPoint);
+			if (pointVal == null || pointVal === 9) {
+				continue;
+			}
 
-			if (adjValue !== null && adjValue !== 9) {
-				size += fill(adjPoint);
+			size += 1;
+			for (const adjPoint of adjPointsOf(p)) {
+				queue.push(adjPoint);
 			}
 		}
 
 		return size;
 	};
 
-	let basinSizes: number[] = [];
-
-	for (const point of lowPoints(grid)) {
-		const size = fill(point);
-		basinSizes.push(size);
-	}
+	const basinSizes = lowPoints(grid)
+		.map((point) => bfs(point))
+		.toArray();
 
 	return basinSizes
 		.sort((a, b) => b - a)
@@ -94,5 +95,5 @@ test(p1.name, () => {
 
 test(p2.name, () => {
 	expect(p2(testData)).toEqual(1134);
-  expect(p2(data)).toEqual(1048128);
+	expect(p2(data)).toEqual(1048128);
 });
