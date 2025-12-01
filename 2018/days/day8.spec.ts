@@ -2,77 +2,42 @@ import { test, expect } from "bun:test";
 import { readFileSync } from "fs";
 import { range } from "lodash";
 
-const data = readFileSync("./2018/inputs/day8.txt", "utf8").trim();
-const testData = `2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2`;
-
-function* yieldElements<T>(xs: T[]): Generator<T> {
-	for (const x of xs) {
-		yield x;
-	}
-}
+type AST = { metadata: number[]; children: AST[] };
 
 const readNode = (nums: Iterator<number>): AST => {
 	const numChildren = nums.next()!;
 	const numMeta = nums.next()!;
 
 	if (numChildren.done || numMeta.done) {
-		throw new Error("Finished Earlyy??");
+		throw new Error("Invalid input, interator finished early");
 	}
 
-	const children: AST[] = [];
-	const metadata: number[] = [];
-
-	for (const _ of range(0, numChildren.value)) {
-		children.push(readNode(nums));
-	}
-
-	for (const _ of range(0, numMeta.value)) {
+	const children: AST[] = range(0, numChildren.value).map(() => readNode(nums));
+	const metadata: number[] = range(0, numMeta.value).map(() => {
 		let n = nums.next();
-		if (n.done) {
-			throw new Error("Iterator finished early");
-		}
-		metadata.push(n.value);
-	}
+		return n.done ? 0 : n.value;
+	});
 
 	return { metadata, children };
 };
 
-function* readMetaP1(ast: AST): Generator<number> {
-	for (const meta of ast.metadata) {
-		yield meta;
-	}
+const p1 = ({ metadata, children }: AST): number =>
+	metadata.reduce((acc, next) => acc + next) +
+	children.reduce((acc, child) => acc + p1(child), 0);
 
-	for (const child of ast.children) {
-		yield* readMetaP1(child);
-	}
-}
-
-const readMetaP2 = ({ metadata, children }: AST): number => {
-	if (children.length === 0) {
-		return metadata.reduce((acc, next) => acc + next);
-	} else {
-		return metadata
-			.map((idx) => {
+const p2 = ({ metadata, children }: AST): number =>
+	children.length === 0
+		? metadata.reduce((acc, next) => acc + next, 0)
+		: metadata.reduce((acc, idx) => {
 				const child = children[idx - 1];
-				return child !== undefined ? readMetaP2(child) : 0;
-			})
-			.reduce((x, y) => x + y);
-	}
-};
+				return child !== undefined ? acc + p2(child) : acc;
+			}, 0);
 
-type AST = { metadata: number[]; children: AST[] };
+const parse = (data: string): AST =>
+	readNode(data.split(" ").map(Number).values());
 
-const p1 = (data: string): number => {
-	const nums = data.split(" ").map(Number);
-	const ast = readNode(yieldElements(nums));
-	return readMetaP1(ast).reduce((x, y) => x + y);
-};
-
-const p2 = (data: string): number => {
-	const nums = data.split(" ").map(Number);
-	const ast = readNode(yieldElements(nums));
-	return readMetaP2(ast);
-};
+const data = parse(readFileSync("./2018/inputs/day8.txt", "utf8").trim());
+const testData = parse(`2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2`);
 
 test("p1", () => {
 	expect(p1(testData)).toEqual(138);
