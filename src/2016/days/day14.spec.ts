@@ -2,7 +2,20 @@ import { expect, test } from "bun:test";
 import { createHash } from "crypto";
 
 const md5 = (input: string) => createHash("md5").update(input).digest("hex");
-const hashAt = (salt: string, idx: number) => md5(`${salt}${idx}`);
+
+const hashCache = new Map<string, string>();
+
+const hashAt = (salt: string, idx: number) => {
+  const key = (`${salt}${idx}`);
+  const existing = hashCache.get(key);
+
+  if (existing) {
+    return existing;
+  }
+  const result = md5(key);
+  hashCache.set(key, result);
+  return result;
+};
 
 const analyzeHash = (hash: string) => {
 	const matches3 = /(.)\1\1/.exec(hash);
@@ -11,43 +24,26 @@ const analyzeHash = (hash: string) => {
 	return { m3: matches3?.[1] ?? null, m5: matches5?.[1] ?? null };
 };
 
-function* hashStream(salt: string): Generator<string> {
-	let index = 0;
+function* runP1(salt: string): Generator<number> {
+  let idx = 0;
 
-	while (true) {
-		yield md5(`${salt}${index}`);
-		index++;
-	}
-}
+  while (true) {
+    let hash = hashAt(salt, idx);
+    const { m3 } = analyzeHash(hash);
 
-function* runP1(
-	salt: string,
-): Generator<{ hash: string; char: string; m3at: number; m5at: number }> {
-	const hashes = hashStream(salt).map((hash, idx) => [idx, hash] as const);
+    if (m3 !== null) {
 
-	let trips: Map<string, number[]> = new Map();
+      for (let i = 1; i <= 1000; i++) {
+        const { m5 } = analyzeHash(hashAt(salt, idx + i));
+        if (m3 === m5) {
+          yield idx;
+          break;
+        }
+      }
+    }
 
-	for (const [idx, hash] of hashes) {
-		const { m3, m5 } = analyzeHash(hash);
-
-		if (m3) {
-			if (!trips.has(m3)) {
-				trips.set(m3, []);
-			}
-			trips.get(m3)!.push(idx);
-		}
-
-		if (m5) {
-			const tripsForChar = trips.get(m5) ?? [];
-			trips.set(m5, []);
-
-			for (const m3at of tripsForChar) {
-				if (idx - m3at < 1000) {
-					yield { hash, char: m5, m3at, m5at: idx };
-				}
-			}
-		}
-	}
+    idx++;
+  }
 }
 
 const testData = "abc";
@@ -65,11 +61,6 @@ test(analyzeHash.name, () => {
 });
 
 test(runP1.name, () => {
-	expect(
-		runP1(testData)
-			.map((x) => x.m3at)
-			.take(64)
-			.toArray()
-			.sort((a, b) => a - b),
-	).toEqual([]);
+	expect(runP1(testData).drop(63).take(1).toArray()).toEqual([22728]);
+  expect(runP1(data).drop(63).take(1).toArray()).toEqual([15168]);
 });

@@ -67,15 +67,15 @@ const p2 = (ranges: Iterable<[number, number]>) =>
 function* invalidIdsPt1V2(start: number, stop: number): Generator<number> {
 	let startDigits = Math.floor(String(start).length / 2);
 
-  let curr = Math.pow(10, startDigits - 1);
+	let curr = Math.pow(10, startDigits - 1);
 
-  while (true) {
+	while (true) {
 		const nextNumber = Number(`${curr}${curr}`);
-    curr++;
+		curr++;
 
-    if (nextNumber < start) {
-      continue;
-    }
+		if (nextNumber < start) {
+			continue;
+		}
 
 		if (nextNumber > stop) {
 			break;
@@ -102,7 +102,7 @@ test(isInvalidP1.name, () => {
 test(invalidIdsPt1V2.name, () => {
 	expect([...invalidIdsPt1V2(11, 22)]).toEqual([11, 22]);
 	expect([...invalidIdsPt1V2(95, 115)]).toEqual([99]);
-  expect([...invalidIdsPt1V2(998, 1012)]).toEqual([1010]);
+	expect([...invalidIdsPt1V2(998, 1012)]).toEqual([1010]);
 });
 
 test(p1.name, () => {
