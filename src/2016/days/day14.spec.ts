@@ -68,7 +68,7 @@ test(runP1.name, () => {
 	expect(
 		runP1(testData)
 			.map((x) => x.m3at)
-      .take(64)
+			.take(64)
 			.toArray()
 			.sort((a, b) => a - b),
 	).toEqual([]);
