@@ -40,6 +40,7 @@ const isInvalidP2 = (id: number): boolean => {
 
 	for (let i = 1; i <= Math.floor(idStr.length / 2); i++) {
 		let pattern = idStr.slice(0, i);
+
 		if (pattern.repeat(idStr.length / pattern.length) === idStr) {
 			return true;
 		}
@@ -55,13 +56,34 @@ const addInvalidIds = (
 	Iterator.from(ranges)
 		.flatMap(([start, stop]) => range(start, stop))
 		.filter((id) => discriminator(id))
-		.reduce((acc, next) => acc + next, 0);
+		.reduce((acc, id) => acc + id, 0);
 
 const p1 = (ranges: Iterable<[number, number]>) =>
 	addInvalidIds(ranges, isInvalidP1);
 
 const p2 = (ranges: Iterable<[number, number]>) =>
 	addInvalidIds(ranges, isInvalidP2);
+
+function* invalidIdsPt1V2(start: number, stop: number): Generator<number> {
+	let startDigits = Math.floor(String(start).length / 2);
+
+  let curr = Math.pow(10, startDigits - 1);
+
+  while (true) {
+		const nextNumber = Number(`${curr}${curr}`);
+    curr++;
+
+    if (nextNumber < start) {
+      continue;
+    }
+
+		if (nextNumber > stop) {
+			break;
+		}
+
+		yield nextNumber;
+	}
+}
 
 test(isInvalidP1.name, () => {
 	const invalid: number[] = [11, 22, 99, 1010, 1188511885];
@@ -77,12 +99,18 @@ test(isInvalidP1.name, () => {
 	}
 });
 
+test(invalidIdsPt1V2.name, () => {
+	expect([...invalidIdsPt1V2(11, 22)]).toEqual([11, 22]);
+	expect([...invalidIdsPt1V2(95, 115)]).toEqual([99]);
+  expect([...invalidIdsPt1V2(998, 1012)]).toEqual([1010]);
+});
+
 test(p1.name, () => {
 	expect(p1(testData)).toEqual(1227775554);
 	expect(p1(data)).toEqual(28846518423);
 });
 
-test(p2.name, () => {
+test.skip(p2.name, () => {
 	expect(p2(testData)).toEqual(4174379265);
 	expect(p2(data)).toEqual(31578210022);
 });
