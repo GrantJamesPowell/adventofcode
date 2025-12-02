@@ -38,13 +38,8 @@ const isInvalidP1 = (id: number): boolean => {
 const isInvalidP2 = (id: number): boolean => {
 	const idStr = `${id}`;
 
-  if (idStr.length % 2 !== 0) {
-    return false;
-  }
-
 	for (let i = 1; i <= Math.floor(idStr.length / 2); i++) {
 		let pattern = idStr.slice(0, i);
-
 		if (pattern.repeat(idStr.length / pattern.length) === idStr) {
 			return true;
 		}
@@ -53,17 +48,20 @@ const isInvalidP2 = (id: number): boolean => {
 	return false;
 };
 
-const addInvalidIds =
-	(discriminator: (x: number) => boolean) =>
-	(ranges: [number, number][]): number =>
-		ranges
-			.values()
-			.flatMap(([start, stop]) => range(start, stop))
-			.filter((id) => discriminator(id))
-			.reduce((acc, next) => acc + next, 0);
+const addInvalidIds = (
+	ranges: Iterable<[number, number]>,
+	discriminator: (x: number) => boolean,
+): number =>
+	Iterator.from(ranges)
+		.flatMap(([start, stop]) => range(start, stop))
+		.filter((id) => discriminator(id))
+		.reduce((acc, next) => acc + next, 0);
 
-const p1 = addInvalidIds(isInvalidP1);
-const p2 = addInvalidIds(isInvalidP2);
+const p1 = (ranges: Iterable<[number, number]>) =>
+	addInvalidIds(ranges, isInvalidP1);
+
+const p2 = (ranges: Iterable<[number, number]>) =>
+	addInvalidIds(ranges, isInvalidP2);
 
 test(isInvalidP1.name, () => {
 	const invalid: number[] = [11, 22, 99, 1010, 1188511885];
