@@ -86,7 +86,7 @@ const testData = parse(
 `.trim(),
 );
 
-const data = parse(readFileSync("./2021/inputs/day9.txt", "utf8").trim());
+const data = parse(readFileSync("src/2021/inputs/day9.txt", "utf8").trim());
 
 test(p1.name, () => {
 	expect(p1(testData)).toEqual(15);

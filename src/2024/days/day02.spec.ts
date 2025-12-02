@@ -60,7 +60,7 @@ import { expect, test } from "bun:test";
 import { readFileSync } from "fs";
 import _ from "lodash";
 
-const data = readFileSync("./2024/inputs/day2.txt", "utf8");
+const data = readFileSync("src/2024/inputs/day2.txt", "utf8");
 const levels = data.split("\n").map((row) => row.split(" ").map(Number));
 
 function* slidingWindow<T>(arr: T[], size: number) {

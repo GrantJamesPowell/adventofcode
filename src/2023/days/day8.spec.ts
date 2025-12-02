@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { test, expect } from "bun:test";
-const data = readFileSync("./2023/inputs/day8.txt", "utf8").trim();
+const data = readFileSync("src/2023/inputs/day8.txt", "utf8").trim();
 
 const testData1 = `
 RL

@@ -36,7 +36,7 @@ const p2 = ({ metadata, children }: AST): number =>
 const parse = (data: string): AST =>
 	readNode(data.split(" ").map(Number).values());
 
-const data = parse(readFileSync("./2018/inputs/day8.txt", "utf8").trim());
+const data = parse(readFileSync("src/2018/inputs/day8.txt", "utf8").trim());
 const testData = parse(`2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2`);
 
 test("p1", () => {

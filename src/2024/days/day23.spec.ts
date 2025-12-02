@@ -36,7 +36,7 @@ wh-qp
 tb-vc
 td-yn
 `.trim();
-const data = readFileSync("./2024/inputs/day23.txt", "utf8").trim();
+const data = readFileSync("src/2024/inputs/day23.txt", "utf8").trim();
 
 type Links = Map<string, Set<string>>;
 
@@ -92,7 +92,6 @@ const interconnectedSets = (graph: Links): Set<string> => {
 	let best: Set<string> = new Set();
 
 	const bronKerbosch = (R: Set<string>, P: Set<string>, X: Set<string>) => {
-		console.log({ best, R, P, X });
 		// Maximal clique found
 		if (P.size === 0 && X.size === 0) {
 			if (R.size > best.size) best = new Set(R);

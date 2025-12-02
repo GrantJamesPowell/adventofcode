@@ -3,7 +3,7 @@ import { test, expect } from "bun:test";
 
 type XmasLetter = "X" | "M" | "A" | "S";
 
-const data = readFileSync("./2024/inputs/day4.txt", "utf8");
+const data = readFileSync("src/2024/inputs/day4.txt", "utf8");
 
 const isLetterXmasLetter = (x: string): x is XmasLetter => `XMAS`.includes(x);
 

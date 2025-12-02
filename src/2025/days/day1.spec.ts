@@ -29,7 +29,7 @@ L82
 `.trim(),
 );
 
-const data = parse(readFileSync("./2025/inputs/day1.txt", "utf8").trim());
+const data = parse(readFileSync("src/2025/inputs/day1.txt", "utf8").trim());
 
 const mod = (n: number, m: number) => ((n % m) + m) % m;
 

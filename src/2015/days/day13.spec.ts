@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { test, expect } from "bun:test";
-const data = readFileSync("./2015/inputs/day13.txt", "utf8").trim();
+const data = readFileSync("src/2015/inputs/day13.txt", "utf8").trim();
 
 const testData = `
 Alice would gain 54 happiness units by sitting next to Bob.
@@ -38,8 +38,6 @@ const parse = (str: string): Graph => {
 			.get(from!)!
 			.set(whom!, Number(amount) * (direction === "gain" ? 1 : -1));
 	}
-
-	console.log(graph);
 
 	return graph;
 };

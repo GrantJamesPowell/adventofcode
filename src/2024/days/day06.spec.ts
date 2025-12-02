@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import { test, expect } from "bun:test";
 import _ from "lodash";
 
-const data = readFileSync("./2024/inputs/day6.txt", "utf8");
+const data = readFileSync("src/2024/inputs/day6.txt", "utf8");
 
 const testData = `
 ....#.....
@@ -105,9 +105,6 @@ const calcUniquePositions = (data: string): number => {
 	let step = 0;
 
 	walking: while (true) {
-		// console.log(
-		// 	printCurrent({ curr, dir, unique, positions: starting.positions }),
-		// );
 		step++;
 		let next = nextPoint(curr, dir);
 
