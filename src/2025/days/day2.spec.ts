@@ -1,19 +1,6 @@
 import { expect, test } from "bun:test";
 import _ from "lodash";
 
-const isInvalidId = (id: number): boolean => {
-	let characters = [...`${id}`];
-
-	if (characters.length % 2 === 0) {
-		const midPoint = characters.length / 2;
-		const begin = characters.slice(0, midPoint);
-		const end = characters.slice(midPoint);
-		return begin.join("") === end.join("");
-	}
-
-	return false;
-};
-
 const parse = (data: string): [number, number][] =>
 	data
 		.trim()
@@ -35,28 +22,69 @@ function* range(start: number, stop: number) {
 	}
 }
 
-const p1 = (ranges: [number, number][]): number =>
-	ranges
-		.values()
-		.flatMap(([start, stop]) => range(start, stop))
-		.filter((id) => isInvalidId(id))
-		.reduce((acc, next) => acc + next);
+const isInvalidP1 = (id: number): boolean => {
+	let characters = `${id}`;
 
-test(isInvalidId.name, () => {
+	if (characters.length % 2 === 0) {
+		const midPoint = characters.length / 2;
+		const begin = characters.slice(0, midPoint);
+		const end = characters.slice(midPoint);
+		return begin === end;
+	}
+
+	return false;
+};
+
+const isInvalidP2 = (id: number): boolean => {
+	const idStr = `${id}`;
+
+  if (idStr.length % 2 !== 0) {
+    return false;
+  }
+
+	for (let i = 1; i <= Math.floor(idStr.length / 2); i++) {
+		let pattern = idStr.slice(0, i);
+
+		if (pattern.repeat(idStr.length / pattern.length) === idStr) {
+			return true;
+		}
+	}
+
+	return false;
+};
+
+const addInvalidIds =
+	(discriminator: (x: number) => boolean) =>
+	(ranges: [number, number][]): number =>
+		ranges
+			.values()
+			.flatMap(([start, stop]) => range(start, stop))
+			.filter((id) => discriminator(id))
+			.reduce((acc, next) => acc + next, 0);
+
+const p1 = addInvalidIds(isInvalidP1);
+const p2 = addInvalidIds(isInvalidP2);
+
+test(isInvalidP1.name, () => {
 	const invalid: number[] = [11, 22, 99, 1010, 1188511885];
 
 	for (const id of invalid) {
-		expect(isInvalidId(id)).toEqual(true);
+		expect(isInvalidP1(id)).toEqual(true);
 	}
 
 	const validIds = [1, 123, 1234, 1188511880];
 
 	for (const id of validIds) {
-		expect(isInvalidId(id)).toEqual(false);
+		expect(isInvalidP1(id)).toEqual(false);
 	}
 });
 
 test(p1.name, () => {
 	expect(p1(testData)).toEqual(1227775554);
 	expect(p1(data)).toEqual(28846518423);
+});
+
+test(p2.name, () => {
+	expect(p2(testData)).toEqual(4174379265);
+	expect(p2(data)).toEqual(31578210022);
 });
